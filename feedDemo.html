@@ -1,0 +1,188 @@
+<html>
+
+<head>
+
+</head>
+
+<body id="master-holder" style="text-align: center;background-color:#e9ebee">
+    <p id="status-txt" style='position: fixed;left: 13px;top: 16px;'>sleep</p>
+    <div style="width: 461px;padding: 0px;margin: 0px auto;">
+        <img src="img/feed1.jpg" width="461">
+    </div>
+    <div style="width: 461px;padding: 0px;margin: 0px auto;">
+        <img src="img/feed1.jpg" width="461">
+    </div>
+    <div style="width: 461px;padding: 0px;margin: 0px auto;">
+        <img src="img/feed1.jpg" width="461">
+    </div>
+
+
+    <div id="idm-player" data-state="pause" data-name="Dan shamir" style="background-image: url('img/poster.jpg');width: 441px;height:248px;padding: 0px;margin: 0px auto;border: 10px solid #FFFFFF;">
+    </div>
+    <p style="padding: 0px;margin: 0px;background-color: #FFFFFF;width: 461;margin: 0px auto;padding-bottom: 7px;color: #196d9e;">idomoo realtime IDM video ads</p>
+
+    <div style="width: 461px;padding: 0px;margin: 0px auto;">
+        <img src="img/feed1.jpg" width="461">
+    </div>
+    <div style="width: 461px;padding: 0px;margin: 0px auto;">
+        <img src="img/feed1.jpg" width="461">
+    </div>
+    <div style="width: 461px;padding: 0px;margin: 0px auto;">
+        <img src="img/feed1.jpg" width="461">
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(this).scrollTop(0);
+        });
+
+        function date_time() {
+            date = new Date;
+            year = date.getFullYear();
+            month = date.getMonth();
+            months = new Array('January', 'February', 'March', 'April', 'May', 'June', 'Jully', 'August', 'September', 'October', 'November', 'December');
+            d = date.getDate();
+            day = date.getDay();
+            days = new Array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
+            h = date.getHours();
+            if (h < 10) {
+                h = "0" + h;
+            }
+            m = date.getMinutes();
+            if (m < 10) {
+                m = "0" + m;
+            }
+            s = date.getSeconds();
+            if (s < 10) {
+                s = "0" + s;
+            }
+            result = h + ':' + m + ':' + s;
+            return result;
+        }
+
+
+        function uuidv4() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function initVideo(element, state) {
+            if (state == element.attr('data-state')) {
+                return;
+            }
+
+            element.attr('data-state', state);
+
+
+            if (state == 'pause') {
+                $('#status-txt').text(state);
+                element.find('video').remove();
+                // element.find('video').get(0).pause();
+                return
+            }
+            if (state == 'play') {
+                $('#status-txt').text(state);
+                element.find('video').get(0).play();
+                return
+            }
+            if (state == 'init') {
+                if (element.find('video').length > 0) {
+                    return
+                }
+                $('#status-txt').text(state);
+            }
+
+            var mainJson = {
+                "response_format": "json",
+                "video": {
+                    "output_formats": [{
+                        "format": "VIDEO_MP4_V_X264_640X360_1600_A_AAC_128"
+                    }],
+                    "data": [{
+                        "key": "name",
+                        "val": "Its " + date_time()
+
+                    }],
+                    "storyboard_id": "12792",
+                    "account_id": 2008,
+                    "ipr": true,
+                    "authentication_token": 'ZE4glIeWYa4b92da9ea97302ba2bbd58426fefb367ppF2E6eHdj'
+                }
+            }
+
+
+
+            var data = element.data();
+
+
+
+            var tmp = Object();
+            tmp.key = 'txt';
+            tmp.val = "Your dream vacation";
+            mainJson.video.data.push(tmp);
+            console.log(JSON.stringify(mainJson));
+            $.ajax({
+                url: 'refreshLists',
+                type: 'POST',
+                dataType: 'json',
+                cache: false,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                url: "https://usa-api.idomoo.com/api/cg",
+                async: true,
+                data: JSON.stringify(mainJson),
+                success: function(data) {
+                    console.log(data.video.output_formats[0].links[0].url)
+                    var video = $('<video />', {
+                        id: 'video',
+                        src: data.video.output_formats[0].links[0].url + "?id=" + uuidv4(),
+                        type: 'video/mp4',
+                        controls: false,
+                        autoplay: true,
+                        loop: true
+                    });
+
+                    video.appendTo(element);
+                    element.find('video').css('width', 441);
+
+                }
+            });
+
+
+
+        }
+
+
+        $(function() {
+            var mainScreenSize = $(document).height();
+            $(window).scroll(function() {
+                $('#idm-player').each(function() {
+                    var eTop = $(this).offset().top; //get the offset top of the element
+                    var playerPos = Math.abs(eTop - $(window).scrollTop());
+
+                    if (playerPos < 2000) {
+                        initVideo($(this), 'play')
+
+                    } else if (playerPos < 3000) {
+                        initVideo($(this), 'init')
+
+
+                    } else {
+                        initVideo($(this), 'pause')
+                    }
+
+
+
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
